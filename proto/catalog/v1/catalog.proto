@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "Catalog";
+
+package proto.catalog.v1;
+
+service CatalogService {
+    rpc ListItems (ListItemsRequest) returns (ListItemsResponse) {}
+}
+
+message ListItemsRequest {}
+
+message ListItemsResponse {
+    repeated Item items = 1;
+}
+
+message Item {
+    string title = 1;
+    uint32 price = 2;
+    uint32 count = 3;
+}
