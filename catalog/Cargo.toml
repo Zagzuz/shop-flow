@@ -12,11 +12,13 @@ path = "src/server.rs"
 
 [dependencies]
 compact_str = "0.8.0-beta"
+eyre = "0.6.11"
 log = { version = "0.4.20", features = [] }
 prost = "0.12.3"
 protoc = "3.0.0-alpha.5"
 tokio = { version = "1.35.1", features = ["rt-multi-thread", "macros"] }
 tonic = "0.10.2"
+rusqlite = { version = "0.30.0", features = ["bundled"] }
 
 [build-dependencies]
 tonic-build = "0.10.2"

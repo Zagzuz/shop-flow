@@ -1,18 +1,39 @@
 use crate::catalog_proto::Item as ProtoItem;
 use compact_str::CompactString;
+use eyre::eyre;
+use rusqlite::Connection;
+use std::{path::Path, sync::Mutex};
 
-#[derive(Default)]
 pub struct Catalog {
-    items: Vec<Item>,
+    db_conn: Mutex<Connection>,
+    db_table: CompactString,
 }
 
 impl Catalog {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(db_path: &Path, db_table: &str) -> Self {
+        Self {
+            db_conn: Mutex::new(Connection::open(db_path).expect("db connection failed")),
+            db_table: db_table.into(),
+        }
     }
 
-    pub fn list_items(&self) -> &Vec<Item> {
-        &self.items
+    pub fn list_items(&self) -> eyre::Result<Vec<Item>> {
+        let conn = self.db_conn.lock().map_err(|err| eyre!(err.to_string()))?;
+        let mut stmt = conn.prepare(&format!(
+            "SELECT title, price, item_count FROM {};",
+            self.db_table
+        ))?;
+        let items = stmt
+            .query_map([], |row| {
+                Ok(Item {
+                    title: row.get::<_, String>(0)?.into(),
+                    price: row.get(1)?,
+                    count: row.get(2)?,
+                })
+            })?
+            .into_iter()
+            .collect::<Result<Vec<Item>, _>>()?;
+        Ok(items)
     }
 }
 
