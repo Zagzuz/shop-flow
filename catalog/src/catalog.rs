@@ -40,7 +40,7 @@ impl Catalog {
 #[derive(Clone)]
 pub struct Item {
     pub title: CompactString,
-    pub price: u32,
+    pub price: f32,
     pub count: u32,
 }
 
