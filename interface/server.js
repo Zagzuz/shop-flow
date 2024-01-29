@@ -57,6 +57,30 @@ function runListItems(socket) {
     client.listItems({}, itemsCallback);
 }
 
+function runFindItem(socket, query) {
+    function itemsCallback(error, response) {
+        if (error) {
+            console.log(error);
+            return;
+        }
+        if (response === null) {
+            return;
+        }
+        if (response.items.length === 0) {
+            console.log('no items');
+            return;
+        }
+        for (let i = 0; i < response.items.length; i++) {
+            const item = response.items[i];
+            console.log(i + 1 + '. ' + item.title + ', price: ' +
+                item.price + ', count: ' + item.count);
+        }
+        socket.emit('itemsResponse', response.items);
+    }
+    console.log('sending list items request..');
+    client.findItem({ title: query }, itemsCallback);
+}
+
 function main() {
     app.get('/', (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -71,7 +95,7 @@ function main() {
         socket.emit('connection', null);
         runListItems(socket);
         socket.on('search', (query) => {
-            console.log(query + ' searched');
+            runFindItem(socket, query);
         });
     })
 

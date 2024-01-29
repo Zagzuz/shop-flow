@@ -2,7 +2,7 @@ use crate::{
     catalog::{Catalog, Item},
     catalog_proto::{
         catalog_service_server::{CatalogService, CatalogServiceServer},
-        ListItemsRequest, ListItemsResponse,
+        FindItemRequest, FindItemResponse, ListItemsRequest, ListItemsResponse,
     },
 };
 use log::info;
@@ -31,6 +31,26 @@ impl CatalogService for MyCatalogService {
             items: self
                 .catalog
                 .list_items()
+                .map_err(|err| Status::new(Code::Unavailable, err.to_string()))?
+                .iter()
+                .cloned()
+                .map(Item::into)
+                .collect(),
+        };
+
+        Ok(Response::new(reply))
+    }
+
+    async fn find_item(
+        &self,
+        request: Request<FindItemRequest>,
+    ) -> Result<Response<FindItemResponse>, Status> {
+        info!("got a request from {:?}", request.remote_addr());
+
+        let reply = FindItemResponse {
+            items: self
+                .catalog
+                .find_item(request.get_ref().title.as_str())
                 .map_err(|err| Status::new(Code::Unavailable, err.to_string()))?
                 .iter()
                 .cloned()

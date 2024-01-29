@@ -35,6 +35,25 @@ impl Catalog {
             .collect::<Result<Vec<Item>, _>>()?;
         Ok(items)
     }
+
+    pub fn find_item(&self, query: &str) -> eyre::Result<Vec<Item>> {
+        let conn = self.db_conn.lock().map_err(|err| eyre!(err.to_string()))?;
+        let mut stmt = conn.prepare(&format!(
+            "SELECT title, price, item_count FROM {} WHERE title LIKE '%{}%';",
+            self.db_table, query
+        ))?;
+        let items = stmt
+            .query_map([], |row| {
+                Ok(Item {
+                    title: row.get::<_, String>(0)?.into(),
+                    price: row.get(1)?,
+                    count: row.get(2)?,
+                })
+            })?
+            .into_iter()
+            .collect::<Result<Vec<Item>, _>>()?;
+        Ok(items)
+    }
 }
 
 #[derive(Clone)]

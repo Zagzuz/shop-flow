@@ -7,11 +7,20 @@ package proto.catalog.v1;
 
 service CatalogService {
     rpc ListItems (ListItemsRequest) returns (ListItemsResponse) {}
+    rpc FindItem (FindItemRequest) returns (FindItemResponse) {}
 }
 
 message ListItemsRequest {}
 
 message ListItemsResponse {
+    repeated Item items = 1;
+}
+
+message FindItemRequest {
+    string title = 1;
+}
+
+message FindItemResponse {
     repeated Item items = 1;
 }
 
